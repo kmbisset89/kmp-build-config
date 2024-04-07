@@ -1,0 +1,26 @@
+[versions]
+detekt = "1.23.6"
+kotlin = "1.9.23"
+ktlintGradle = "12.1.0"
+pluginPublish = "1.2.1"
+versionCheck = "0.51.0"
+kotlin-poet = "1.16.0"
+junit5 = "5.10.0"
+junit5-platform = "1.10.0"
+mockk = "1.13.9"
+
+[plugins]
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt"}
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin"}
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintGradle"}
+pluginPublish = { id = "com.gradle.plugin-publish", version.ref = "pluginPublish"}
+versionCheck = { id = "com.github.ben-manes.versions", version.ref = "versionCheck"}
+
+[libraries]
+junit5-platform = { module = "org.junit.platform:junit-platform-runner", version.ref = "junit5-platform" }
+junit5-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
+junit5-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
+junit5-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit5" }
+kotlin-poet = { module = "com.squareup:kotlinpoet", version.ref = "kotlin-poet" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+
