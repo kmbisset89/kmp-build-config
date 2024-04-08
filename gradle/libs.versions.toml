@@ -1,6 +1,7 @@
 [versions]
 detekt = "1.23.6"
 kotlin = "1.9.23"
+kotlin-gradle-plugin = "1.6.10"
 ktlintGradle = "12.1.0"
 pluginPublish = "1.2.1"
 versionCheck = "0.51.0"
@@ -20,6 +21,8 @@ versionCheck = { id = "com.github.ben-manes.versions", version.ref = "versionChe
 junit5-platform = { module = "org.junit.platform:junit-platform-runner", version.ref = "junit5-platform" }
 junit5-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
 junit5-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin"}
+
 junit5-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit5" }
 kotlin-poet = { module = "com.squareup:kotlinpoet", version.ref = "kotlin-poet" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }

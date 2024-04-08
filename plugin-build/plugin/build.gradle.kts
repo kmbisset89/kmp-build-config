@@ -5,12 +5,14 @@ import java.util.*
 plugins {
     kotlin("jvm")
     `java-gradle-plugin`
+//    alias(libs.plugins.kotlin.gradle.plugn)
     alias(libs.plugins.pluginPublish)
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(gradleApi())
+    implementation(libs.kotlin.gradle.plugin)
     implementation(libs.kotlin.poet)
     testImplementation(libs.junit5.api)
     testImplementation(libs.junit5.engine)

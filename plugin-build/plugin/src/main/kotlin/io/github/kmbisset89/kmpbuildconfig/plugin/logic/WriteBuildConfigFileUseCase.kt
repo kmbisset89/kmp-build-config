@@ -9,6 +9,9 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.SourceSet
 import java.io.File
 
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
+
+
 /**
  * Generates a Kotlin file containing a BuildConfig object with compile-time constants.
  * This use case facilitates the dynamic generation of a BuildConfig class for a project,
@@ -31,7 +34,7 @@ class WriteBuildConfigFileUseCase {
      */
     operator fun invoke(
         packageName: String,
-        sourceSetName: SourceSet,
+        sourceSetName: String,
         buildConfigFileName: String,
         config: Config,
         project: Project
@@ -68,7 +71,7 @@ class WriteBuildConfigFileUseCase {
                 appendFileSeparator
                 append("src")
                 appendFileSeparator
-                append(sourceSetName.name)
+                append(sourceSetName)
                 appendFileSeparator
                 append("kotlin")
             }
@@ -80,6 +83,7 @@ class WriteBuildConfigFileUseCase {
         // Write the generated Kotlin file to the output directory
         kotlinFile.writeTo(outputDir)
 
+        AddToSourceDirUseCase().invoke(project, sourceSetName, outputDir.absolutePath)
     }
 }
 
