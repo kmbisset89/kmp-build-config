@@ -12,7 +12,6 @@ import kotlin.reflect.KType
 
 sealed class ConfigProperty {
 
-    abstract fun build(typeSpecBuilder: TypeSpec.Builder, fileSpecBuilder: FileSpec.Builder)
 
     open class ObjectConfigProperty(
         @Input
@@ -20,9 +19,14 @@ sealed class ConfigProperty {
         @Nested
         val properties: List<ConfigProperty>
     ) : ConfigProperty() {
-        override fun build(typeSpecBuilder: TypeSpec.Builder, fileSpecBuilder: FileSpec.Builder) {
+        fun build(typeSpecBuilder: TypeSpec.Builder, fileSpecBuilder: FileSpec.Builder) {
             val type = TypeSpec.objectBuilder(name).also { b ->
-                properties.forEach { it.build(b, fileSpecBuilder) }
+                properties.forEach {
+                    when (it) {
+                        is LiteralTemplateConfigProperty<*> -> it.build(b)
+                        is ObjectConfigProperty -> it.build(b, fileSpecBuilder)
+                    }
+                }
             }.build()
             typeSpecBuilder.addType(type)
         }
@@ -39,7 +43,7 @@ sealed class ConfigProperty {
         @Optional
         val value: T
     ) : ConfigProperty() {
-        override fun build(typeSpecBuilder: TypeSpec.Builder, fileSpecBuilder: FileSpec.Builder) {
+        fun build(typeSpecBuilder: TypeSpec.Builder) {
             val prop = PropertySpec
                 .builder(name, type.asTypeName())
                 .initializer(template, value)

@@ -41,15 +41,17 @@ class WriteBuildConfigFileUseCase {
         val buildConfigObject = TypeSpec.objectBuilder(buildConfigFileName.substringBeforeLast(".kt"))
             .addModifiers(KModifier.PUBLIC).also { type ->
                 config.properties.forEach {
-                    it.build(type, kotlinFileBuilder)
+                    when(it){
+                        is ConfigProperty.LiteralTemplateConfigProperty<*> -> it.build(type)
+                        is ConfigProperty.ObjectConfigProperty -> it.build(type, kotlinFileBuilder)
+                    }
                 }
             }
 
         val kotlinFile = kotlinFileBuilder.addType(buildConfigObject.build()).build()
 
-
         // Define the output directory for the Kotlin file within the specified source set
-        val outputDir = project.file("src/$sourceSetName/kotlin")
+        val outputDir = project.file("build/generated/config/$sourceSetName/kotlin")
 
         // Ensure the output directory exists
         outputDir.mkdirs()
