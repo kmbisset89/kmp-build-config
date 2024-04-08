@@ -2,14 +2,10 @@ package io.github.kmbisset89.kmpbuildconfig.plugin.logic
 
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.KModifier
-import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import io.github.kmbisset89.kmpbuildconfig.plugin.Config
 import org.gradle.api.Project
-import org.gradle.api.tasks.SourceSet
 import java.io.File
-
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 
 
 /**
@@ -83,8 +79,6 @@ class WriteBuildConfigFileUseCase {
 
         // Write the generated Kotlin file to the output directory
         kotlinFile.writeTo(outputDir)
-
-        AddToSourceDirUseCase().invoke(project, sourceSetName, outputDir.absolutePath)
     }
 }
 
