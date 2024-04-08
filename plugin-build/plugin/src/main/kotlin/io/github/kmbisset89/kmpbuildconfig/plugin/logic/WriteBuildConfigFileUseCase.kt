@@ -4,6 +4,7 @@ import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import io.github.kmbisset89.kmpbuildconfig.plugin.Config
 import org.gradle.api.Project
 
 /**
@@ -21,43 +22,31 @@ class WriteBuildConfigFileUseCase {
     /**
      * Invokes the use case to generate the BuildConfig file.
      *
-     * @param version The application's version, which will be included in the BuildConfig.
      * @param packageName The package name under which the BuildConfig file will be generated.
      * @param sourceSetName The name of the source set where the BuildConfig file will be placed.
      * @param buildConfigFileName The name of the BuildConfig file to be generated.
-     * @param propertyMap A map of additional properties to include in the BuildConfig object.
-     *                    Each entry in the map represents a constant that will be added to BuildConfig.
-     * @param project The Gradle project reference, used to locate the source set directory.
+
      */
     operator fun invoke(
-        version: String,
         packageName: String,
         sourceSetName: String,
         buildConfigFileName: String,
-        propertyMap: Map<String, String>,
+        config : Config,
         project: Project
     ) {
-        // Create a BuildConfig object with the VERSION property and additional properties from propertyMap
-        val buildConfigObject = TypeSpec.objectBuilder("BuildConfig")
-            .addModifiers(KModifier.PUBLIC)
-            .addProperty(
-                PropertySpec.builder("VERSION", String::class, KModifier.CONST)
-                    .initializer("%S", version)
-                    .build())
-
-        // Iterate through the propertyMap to add each property as a constant to BuildConfig
-        propertyMap.forEach { (key, value) ->
-            buildConfigObject.addProperty(
-                PropertySpec.builder(key.uppercase(), String::class, KModifier.CONST)
-                    .initializer("%S", value)
-                    .build()
-            )
-        }
-
         // Prepare the Kotlin file specification with the BuildConfig object
-        val kotlinFile = FileSpec.builder(packageName, buildConfigFileName)
-            .addType(buildConfigObject.build())
-            .build()
+        val kotlinFileBuilder = FileSpec.builder(packageName, buildConfigFileName)
+
+        // Create a BuildConfig object with the VERSION property and additional properties from propertyMap
+        val buildConfigObject = TypeSpec.objectBuilder(config.objectName)
+            .addModifiers(KModifier.PUBLIC).also { type ->
+                config.properties.forEach {
+                    it.build(type, kotlinFileBuilder)
+                }
+            }
+
+        val kotlinFile = kotlinFileBuilder.addType(buildConfigObject.build()).build()
+
 
         // Define the output directory for the Kotlin file within the specified source set
         val outputDir = project.file("src/$sourceSetName/kotlin")

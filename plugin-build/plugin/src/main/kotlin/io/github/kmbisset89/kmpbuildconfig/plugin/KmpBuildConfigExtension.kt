@@ -1,22 +1,27 @@
 package io.github.kmbisset89.kmpbuildconfig.plugin
 
+import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Internal
 import javax.inject.Inject
 
 
 @Suppress("UnnecessaryAbstractClass")
-abstract class KmpBuildConfig constructor(project: Project) {
+abstract class KmpBuildConfigExtension constructor(project: Project) {
     @Inject
     private val objects = project.objects
-
-    val versionNumber = objects.property(String::class.java)
-
-    val buildConfigProperties = objects.mapProperty(String::class.java, String::class.java)
 
     val buildConfigFileName = objects.property(String::class.java)
 
     val sourceSetName = objects.property(String::class.java)
 
     val packageName = objects.property(String::class.java)
+
+    @Internal
+    lateinit var config: Config
+    fun config(action: Action<ConfigBuilder>) {
+        val builder = ConfigBuilder(objects)
+        action.execute(builder)
+        config = builder.build()
+    }
 }

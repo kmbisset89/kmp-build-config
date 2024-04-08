@@ -5,6 +5,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
@@ -27,13 +28,6 @@ abstract class MakeBuildConfig : DefaultTask() {
         group = BasePlugin.BUILD_GROUP
     }
 
-    // Version property to be included in the BuildConfig.
-    @get:Input
-    @get:Option(
-        option = "version",
-        description = "The version to set for the project in the build config file."
-    )
-    abstract val version: Property<String>
 
     // Package name for the generated BuildConfig file.
     @get:Input
@@ -61,14 +55,8 @@ abstract class MakeBuildConfig : DefaultTask() {
     )
     abstract val buildConfigFileName: Property<String?>
 
-    // Optional map of additional properties to include in the BuildConfig.
-    @get:Input
-    @get:Optional
-    @get:Option(
-        option = "propertyMap",
-        description = "A map of properties to set in the build config file."
-    )
-    abstract val propertyMap: Property<Map<String, String>?>
+    @get:Nested
+    lateinit var config: Config
 
     /**
      * The task's action to execute the build config file generation.
@@ -78,19 +66,16 @@ abstract class MakeBuildConfig : DefaultTask() {
     @TaskAction
     fun executeTask() {
         // Retrieve properties or their default values.
-        val version = version.get()
         val packageName = packageName.get()
         val sourceSetName = sourceSetName.orNull ?: "commonMain"
         val buildConfigFileName = buildConfigFileName.orNull ?: "BuildConfig.kt"
-        val propertyMap = propertyMap.orNull ?: emptyMap()
 
         // Execute the use case to generate the BuildConfig file.
         WriteBuildConfigFileUseCase().invoke(
-            version,
             packageName,
             sourceSetName,
             buildConfigFileName,
-            propertyMap,
+            config,
             project
         )
     }
