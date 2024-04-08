@@ -21,16 +21,15 @@ abstract class KmpBuildConfigPlugin : Plugin<Project> {
         // Create an extension for this plugin to allow configuration via the build script.
         val extension = project.extensions.create(EXTENSION_NAME, KmpBuildConfigExtension::class.java, project)
 
-        project.afterEvaluate {
-            // Register the 'createBuildConfig' task and configure it with the properties defined in the extension.
-            val task =
-                project.tasks.register(CREATE_BUILD_CONFIG, MakeBuildConfig::class.java) {
-                    it.packageName.set(extension.packageName) // Set the package name from the extension.
-                    it.sourceSetName.set(extension.sourceSetName) // Set the source set name from the extension, if specified.
-                    it.buildConfigFileName.set(extension.buildConfigFileName) // Set the build config file name from the extension, if specified.
-                    it.config = extension.config // Set the config object from the extension.
-                }
-        }
+        // Register the 'createBuildConfig' task and configure it with the properties defined in the extension.
+        val task =
+            project.tasks.register(CREATE_BUILD_CONFIG, MakeBuildConfig::class.java) {
+                it.packageName.set(extension.packageName) // Set the package name from the extension.
+                it.sourceSetName.set(extension.sourceSetName) // Set the source set name from the extension, if specified.
+                it.buildConfigFileName.set(extension.buildConfigFileName) // Set the build config file name from the extension, if specified.
+                it.config = extension.config // Set the config object from the extension.
+            }
+
 
     }
 

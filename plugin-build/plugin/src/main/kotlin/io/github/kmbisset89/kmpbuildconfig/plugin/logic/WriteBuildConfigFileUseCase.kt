@@ -39,6 +39,7 @@ class WriteBuildConfigFileUseCase {
         config: Config,
         project: Project
     ) {
+
         // Prepare the Kotlin file specification with the BuildConfig object
         val kotlinFileBuilder = FileSpec.builder(packageName, buildConfigFileName)
 
