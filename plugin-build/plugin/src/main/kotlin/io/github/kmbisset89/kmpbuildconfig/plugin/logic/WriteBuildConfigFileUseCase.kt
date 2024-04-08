@@ -71,7 +71,7 @@ class WriteBuildConfigFileUseCase {
         // Write the generated Kotlin file to the output directory
         kotlinFile.writeTo(outputDir.get().asFile)
 
-        sourceSetName.srcDirs(outputDir.get().asFile.absolutePath)
+        sourceSetName.srcDirs(outputDir.get().asFile.relativeTo(File(project.path)).path)
     }
 }
 
