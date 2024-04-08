@@ -1,11 +1,25 @@
 package io.github.kmbisset89.kmpbuildconfig.plugin.logic
 
+import kotlin.reflect.full.createType
+
 open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit) {
     val allConfigProperties: MutableList<ConfigProperty> = mutableListOf()
 
     init {
         initBlock()
     }
+
+
+    infix fun String.withString(value: String?) = this@ConfigPropertiesBuilder.string(value).also {
+        val property = ConfigProperty.LiteralTemplateConfigProperty(
+            name = this,
+            template = "%S",
+            value = value,
+            type = String::class.createType(nullable = true)
+        )
+        allConfigProperties.add(property)
+    }
+
 
     fun <T : String?> string(value: T) = LiteralTemplateConfigPropertyDelegate(
         value = value,
