@@ -6,6 +6,7 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import io.github.kmbisset89.kmpbuildconfig.plugin.Config
 import org.gradle.api.Project
+import java.io.File
 
 /**
  * Generates a Kotlin file containing a BuildConfig object with compile-time constants.
@@ -31,7 +32,7 @@ class WriteBuildConfigFileUseCase {
         packageName: String,
         sourceSetName: String,
         buildConfigFileName: String,
-        config : Config,
+        config: Config,
         project: Project
     ) {
         // Prepare the Kotlin file specification with the BuildConfig object
@@ -41,7 +42,7 @@ class WriteBuildConfigFileUseCase {
         val buildConfigObject = TypeSpec.objectBuilder(buildConfigFileName.substringBeforeLast(".kt"))
             .addModifiers(KModifier.PUBLIC).also { type ->
                 config.properties.forEach {
-                    when(it){
+                    when (it) {
                         is ConfigProperty.LiteralTemplateConfigProperty<*> -> it.build(type)
                         is ConfigProperty.ObjectConfigProperty -> it.build(type, kotlinFileBuilder)
                     }
@@ -51,7 +52,26 @@ class WriteBuildConfigFileUseCase {
         val kotlinFile = kotlinFileBuilder.addType(buildConfigObject.build()).build()
 
         // Define the output directory for the Kotlin file within the specified source set
-        val outputDir = project.file("build/generated/config/$sourceSetName/kotlin")
+        val outputDir = project.file(
+            buildString {
+                appendFileSeparator
+                append("build")
+                appendFileSeparator
+                append("generated")
+                appendFileSeparator
+                append("config")
+                appendFileSeparator
+                append(project.rootProject.name)
+                appendFileSeparator
+                append(project.name)
+                appendFileSeparator
+                append("src")
+                appendFileSeparator
+                append(sourceSetName)
+                appendFileSeparator
+                append("kotlin")
+            }
+        )
 
         // Ensure the output directory exists
         outputDir.mkdirs()
@@ -60,3 +80,6 @@ class WriteBuildConfigFileUseCase {
         kotlinFile.writeTo(outputDir)
     }
 }
+
+private val StringBuilder.appendFileSeparator: StringBuilder
+    get() = append(File.separator)
