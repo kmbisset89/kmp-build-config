@@ -2,6 +2,7 @@ package io.github.kmbisset89.kmpbuildconfig.plugin
 
 import io.github.kmbisset89.kmpbuildconfig.plugin.logic.WriteBuildConfigFileUseCase
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -9,6 +10,7 @@ import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 
 
 /**
@@ -44,7 +46,8 @@ abstract class MakeBuildConfig : DefaultTask() {
         option = "sourceSetName",
         description = "The source set name to set for the project in the build config file. Defaults to commonMain."
     )
-    abstract val sourceSetName: Property<String?>
+    abstract val sourceSetName: Property<SourceDirectorySet>
+
 
     // Optional file name for the BuildConfig, defaulting to BuildConfig.kt.
     @get:Input
@@ -67,7 +70,7 @@ abstract class MakeBuildConfig : DefaultTask() {
     fun executeTask() {
         // Retrieve properties or their default values.
         val packageName = packageName.get()
-        val sourceSetName = sourceSetName.orNull ?: "commonMain"
+        val sourceSetName = sourceSetName.get()
         val buildConfigFileName = buildConfigFileName.orNull ?: "BuildConfig.kt"
 
         // Execute the use case to generate the BuildConfig file.

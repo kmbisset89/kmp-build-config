@@ -5,6 +5,8 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.TypeSpec
 import io.github.kmbisset89.kmpbuildconfig.plugin.Config
 import org.gradle.api.Project
+import org.gradle.api.file.SourceDirectorySet
+import org.gradle.api.tasks.SourceSet
 import java.io.File
 
 
@@ -30,7 +32,7 @@ class WriteBuildConfigFileUseCase {
      */
     operator fun invoke(
         packageName: String,
-        sourceSetName: String,
+        sourceSetName: SourceDirectorySet,
         buildConfigFileName: String,
         config: Config,
         project: Project
@@ -69,6 +71,8 @@ class WriteBuildConfigFileUseCase {
 
         // Write the generated Kotlin file to the output directory
         kotlinFile.writeTo(outputDir)
+
+        sourceSetName.srcDirs(outputDir)
     }
 }
 
