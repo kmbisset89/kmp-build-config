@@ -25,9 +25,9 @@ abstract class KmpBuildConfigPlugin : Plugin<Project> {
             project.tasks.register(CREATE_BUILD_CONFIG, MakeBuildConfig::class.java) {
                 it.version.set(extension.versionNumber) // Set the version number from the extension.
                 it.packageName.set(extension.packageName) // Set the package name from the extension.
-                it.propertyMap.set(extension.buildConfigProperties.orNull) // Set additional properties from the extension.
-                it.sourceSetName.set(extension.sourceSetName.orNull) // Set the source set name from the extension, if specified.
-                it.buildConfigFileName.set(extension.buildConfigFileName.orNull) // Set the build config file name from the extension, if specified.
+                it.propertyMap.set(extension.buildConfigProperties) // Set additional properties from the extension.
+                it.sourceSetName.set(extension.sourceSetName) // Set the source set name from the extension, if specified.
+                it.buildConfigFileName.set(extension.buildConfigFileName) // Set the build config file name from the extension, if specified.
             }
     }
 
