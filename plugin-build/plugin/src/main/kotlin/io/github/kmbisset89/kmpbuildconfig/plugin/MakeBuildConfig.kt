@@ -7,6 +7,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 
@@ -39,12 +40,11 @@ abstract class MakeBuildConfig : DefaultTask() {
 
     // Optional source set name where the BuildConfig will be generated.
     @get:Input
-    @get:Optional
     @get:Option(
-        option = "sourceSetName",
-        description = "The source set name to set for the project in the build config file. Defaults to commonMain."
+        option = "sourceSet",
+        description = "The source set name to set for the project in the build config file"
     )
-    abstract val sourceSetName: Property<String?>
+    abstract val sourceSetName: Property<SourceSet>
 
     // Optional file name for the BuildConfig, defaulting to BuildConfig.kt.
     @get:Input
@@ -67,7 +67,7 @@ abstract class MakeBuildConfig : DefaultTask() {
     fun executeTask() {
         // Retrieve properties or their default values.
         val packageName = packageName.get()
-        val sourceSetName = sourceSetName.orNull ?: "commonMain"
+        val sourceSetName = sourceSetName.get()
         val buildConfigFileName = buildConfigFileName.orNull ?: "BuildConfig.kt"
 
         // Execute the use case to generate the BuildConfig file.
