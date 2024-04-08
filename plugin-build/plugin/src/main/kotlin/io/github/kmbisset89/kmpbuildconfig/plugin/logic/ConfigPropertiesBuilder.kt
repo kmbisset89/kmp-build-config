@@ -10,7 +10,7 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
     }
 
 
-    infix fun String.withString(value: String?) = this@ConfigPropertiesBuilder.string(value).also {
+    infix fun String.withOptionalString(value: String?) {
         val property = ConfigProperty.LiteralTemplateConfigProperty(
             name = this,
             template = "%S",
@@ -20,40 +20,122 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
         allConfigProperties.add(property)
     }
 
+    infix fun String.withString(value: String)  {
+        val property = ConfigProperty.LiteralTemplateConfigProperty(
+            name = this,
+            template = "%S",
+            value = value,
+            type = String::class.createType(nullable = true)
+        )
+        allConfigProperties.add(property)
+    }
 
-    fun <T : String?> string(value: T) = LiteralTemplateConfigPropertyDelegate(
-        value = value,
-        template = "%S",
-        configPropertiesBuilder = this
-    )
+    infix fun String.withOptionalBool(value: Boolean?) {
+            val property = ConfigProperty.LiteralTemplateConfigProperty(
+                name = this,
+                template = "%L",
+                value = value,
+                type = Boolean::class.createType(nullable = true)
+            )
+            allConfigProperties.add(property)
+        }
 
-    fun <T : Boolean?> bool(value: T) = LiteralTemplateConfigPropertyDelegate(
-        value = value,
-        template = "%L",
-        configPropertiesBuilder = this
-    )
+    infix fun String.withBool(value: Boolean) {
+        val property = ConfigProperty.LiteralTemplateConfigProperty(
+            name = this,
+            template = "%L",
+            value = value,
+            type = Boolean::class.createType(nullable = false)
+        )
+        allConfigProperties.add(property)
+    }
 
-    @Suppress("UNUSED")
-    fun <T : Boolean?> boolean(value: T) = bool(value)
+    infix fun String.withOptionalInt(value: Int?) {
+        val property = ConfigProperty.LiteralTemplateConfigProperty(
+            name = this,
+            template = "%L",
+            value = value,
+            type = Int::class.createType(nullable = true)
+        )
+        allConfigProperties.add(property)
+    }
 
-    fun <T : Number?> number(value: T) = NumberTemplateConfigPropertyDelegate(
-        value = value,
-        configPropertiesBuilder = this
-    )
+    infix fun String.withInt(value: Int) {
+        val property = ConfigProperty.LiteralTemplateConfigProperty(
+            name = this,
+            template = "%L",
+            value = value,
+            type = Int::class.createType(nullable = false)
+        )
+        allConfigProperties.add(property)
+    }
 
-    @Suppress("UNUSED")
-    fun <T : Int?> int(value: T) = number(value)
+    infix fun String.withOptionalLong(value: Long?) {
+        val property = ConfigProperty.LiteralTemplateConfigProperty(
+            name = this,
+            template = "%L",
+            value = value,
+            type = Long::class.createType(nullable = true)
+        )
+        allConfigProperties.add(property)
+    }
 
-    @Suppress("UNUSED")
-    fun <T : Long?> long(value: T) = number(value)
+    infix fun String.withLong(value: Long) {
+        val property = ConfigProperty.LiteralTemplateConfigProperty(
+            name = this,
+            template = "%L",
+            value = value,
+            type = Long::class.createType(nullable = false)
+        )
+        allConfigProperties.add(property)
+    }
 
-    @Suppress("UNUSED")
-    fun <T : Double?> double(value: T) = number(value)
+    infix fun String.withOptionalFloat(value: Float?) {
+        val property = ConfigProperty.LiteralTemplateConfigProperty(
+            name = this,
+            template = "%L",
+            value = value,
+            type = Float::class.createType(nullable = true)
+        )
+        allConfigProperties.add(property)
+    }
 
-    @Suppress("UNUSED")
-    fun <T : Float?> float(value: Float?) = number(value)
+    infix fun String.withFloat(value: Float) {
+        val property = ConfigProperty.LiteralTemplateConfigProperty(
+            name = this,
+            template = "%L",
+            value = value,
+            type = Float::class.createType(nullable = false)
+        )
+        allConfigProperties.add(property)
+    }
 
-    @Suppress("UNUSED")
-    fun obj(valueBuilder: ConfigPropertiesBuilder.() -> Unit) =
-        ObjectConfigPropertyDelegate(valueBuilder, this)
+    infix fun String.withOptionalDouble(value: Double?) {
+        val property = ConfigProperty.LiteralTemplateConfigProperty(
+            name = this,
+            template = "%L",
+            value = value,
+            type = Double::class.createType(nullable = true)
+        )
+        allConfigProperties.add(property)
+    }
+
+    infix fun String.withDouble(value: Double) {
+        val property = ConfigProperty.LiteralTemplateConfigProperty(
+            name = this,
+            template = "%L",
+            value = value,
+            type = Double::class.createType(nullable = false)
+        )
+        allConfigProperties.add(property)
+    }
+
+    infix fun String.withObj(valueBuilder: ConfigPropertiesBuilder.() -> Unit) {
+        val builder = ConfigPropertiesBuilder(valueBuilder)
+        val property = ConfigProperty.ObjectConfigProperty(
+            name = this,
+            properties = builder.allConfigProperties
+        )
+        allConfigProperties.add(property)
+    }
 }
