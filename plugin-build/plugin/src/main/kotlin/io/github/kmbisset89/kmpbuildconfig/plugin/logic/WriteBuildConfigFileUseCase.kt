@@ -38,7 +38,7 @@ class WriteBuildConfigFileUseCase {
         val kotlinFileBuilder = FileSpec.builder(packageName, buildConfigFileName)
 
         // Create a BuildConfig object with the VERSION property and additional properties from propertyMap
-        val buildConfigObject = TypeSpec.objectBuilder(config.objectName)
+        val buildConfigObject = TypeSpec.objectBuilder(buildConfigFileName.substringBeforeLast(".kt"))
             .addModifiers(KModifier.PUBLIC).also { type ->
                 config.properties.forEach {
                     it.build(type, kotlinFileBuilder)
