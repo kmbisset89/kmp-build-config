@@ -6,7 +6,6 @@ import com.squareup.kotlinpoet.TypeSpec
 import io.github.kmbisset89.kmpbuildconfig.plugin.Config
 import org.gradle.api.Project
 import org.gradle.api.file.SourceDirectorySet
-import org.gradle.api.tasks.SourceSet
 import java.io.File
 
 
@@ -46,7 +45,7 @@ class WriteBuildConfigFileUseCase {
             .addModifiers(KModifier.PUBLIC).also { type ->
                 config.properties.forEach {
                     when (it) {
-                        is ConfigProperty.LiteralTemplateConfigProperty<*> -> it.build(type)
+                        is ConfigProperty.PrimitiveConfigProperty<*> -> it.build(type)
                         is ConfigProperty.ObjectConfigProperty -> it.build(type, kotlinFileBuilder)
                     }
                 }
@@ -61,8 +60,6 @@ class WriteBuildConfigFileUseCase {
             append("source")
             appendFileSeparator
             append("buildConfig")
-            appendFileSeparator
-            append(sourceSetName.name)
         })
 
         // Ensure the output directory exists

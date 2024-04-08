@@ -11,7 +11,7 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
 
 
     infix fun String.withOptionalString(value: String?) {
-        val property = ConfigProperty.LiteralTemplateConfigProperty(
+        val property = ConfigProperty.PrimitiveConfigProperty(
             name = this,
             template = "%S",
             value = value,
@@ -21,7 +21,7 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
     }
 
     infix fun String.withString(value: String)  {
-        val property = ConfigProperty.LiteralTemplateConfigProperty(
+        val property = ConfigProperty.PrimitiveConfigProperty(
             name = this,
             template = "%S",
             value = value,
@@ -31,7 +31,7 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
     }
 
     infix fun String.withOptionalBool(value: Boolean?) {
-            val property = ConfigProperty.LiteralTemplateConfigProperty(
+            val property = ConfigProperty.PrimitiveConfigProperty(
                 name = this,
                 template = "%L",
                 value = value,
@@ -41,7 +41,7 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
         }
 
     infix fun String.withBool(value: Boolean) {
-        val property = ConfigProperty.LiteralTemplateConfigProperty(
+        val property = ConfigProperty.PrimitiveConfigProperty(
             name = this,
             template = "%L",
             value = value,
@@ -51,7 +51,7 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
     }
 
     infix fun String.withOptionalInt(value: Int?) {
-        val property = ConfigProperty.LiteralTemplateConfigProperty(
+        val property = ConfigProperty.PrimitiveConfigProperty(
             name = this,
             template = "%L",
             value = value,
@@ -61,7 +61,7 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
     }
 
     infix fun String.withInt(value: Int) {
-        val property = ConfigProperty.LiteralTemplateConfigProperty(
+        val property = ConfigProperty.PrimitiveConfigProperty(
             name = this,
             template = "%L",
             value = value,
@@ -71,7 +71,7 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
     }
 
     infix fun String.withOptionalLong(value: Long?) {
-        val property = ConfigProperty.LiteralTemplateConfigProperty(
+        val property = ConfigProperty.PrimitiveConfigProperty(
             name = this,
             template = "%L",
             value = value,
@@ -81,7 +81,7 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
     }
 
     infix fun String.withLong(value: Long) {
-        val property = ConfigProperty.LiteralTemplateConfigProperty(
+        val property = ConfigProperty.PrimitiveConfigProperty(
             name = this,
             template = "%L",
             value = value,
@@ -91,7 +91,7 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
     }
 
     infix fun String.withOptionalFloat(value: Float?) {
-        val property = ConfigProperty.LiteralTemplateConfigProperty(
+        val property = ConfigProperty.PrimitiveConfigProperty(
             name = this,
             template = "%L",
             value = value,
@@ -101,7 +101,7 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
     }
 
     infix fun String.withFloat(value: Float) {
-        val property = ConfigProperty.LiteralTemplateConfigProperty(
+        val property = ConfigProperty.PrimitiveConfigProperty(
             name = this,
             template = "%L",
             value = value,
@@ -111,7 +111,7 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
     }
 
     infix fun String.withOptionalDouble(value: Double?) {
-        val property = ConfigProperty.LiteralTemplateConfigProperty(
+        val property = ConfigProperty.PrimitiveConfigProperty(
             name = this,
             template = "%L",
             value = value,
@@ -121,7 +121,7 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
     }
 
     infix fun String.withDouble(value: Double) {
-        val property = ConfigProperty.LiteralTemplateConfigProperty(
+        val property = ConfigProperty.PrimitiveConfigProperty(
             name = this,
             template = "%L",
             value = value,

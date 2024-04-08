@@ -23,7 +23,7 @@ sealed class ConfigProperty {
             val type = TypeSpec.objectBuilder(name).also { b ->
                 properties.forEach {
                     when (it) {
-                        is LiteralTemplateConfigProperty<*> -> it.build(b)
+                        is PrimitiveConfigProperty<*> -> it.build(b)
                         is ObjectConfigProperty -> it.build(b, fileSpecBuilder)
                     }
                 }
@@ -32,7 +32,7 @@ sealed class ConfigProperty {
         }
     }
 
-    open class LiteralTemplateConfigProperty<T>(
+    open class PrimitiveConfigProperty<T>(
         @Input
         val name: String,
         @Internal
