@@ -25,7 +25,7 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
             name = this,
             template = "%S",
             value = value,
-            type = String::class.createType(nullable = true)
+            type = String::class.createType(nullable = false)
         )
         allConfigProperties.add(property)
     }

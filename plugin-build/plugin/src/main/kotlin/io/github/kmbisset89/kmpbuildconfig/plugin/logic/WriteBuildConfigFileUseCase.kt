@@ -61,16 +61,6 @@ class WriteBuildConfigFileUseCase {
                 append("generated")
                 appendFileSeparator
                 append("config")
-                appendFileSeparator
-                append(project.rootProject.name)
-                appendFileSeparator
-                append(project.name)
-                appendFileSeparator
-                append("src")
-                appendFileSeparator
-                append(sourceSetName)
-                appendFileSeparator
-                append("kotlin")
             }
         )
 
