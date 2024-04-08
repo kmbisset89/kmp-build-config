@@ -55,24 +55,23 @@ class WriteBuildConfigFileUseCase {
         val kotlinFile = kotlinFileBuilder.addType(buildConfigObject.build()).build()
 
         // Define the output directory for the Kotlin file within the specified source set
-        val outputDir = project.file(
-            buildString {
-                appendFileSeparator
-                append("build")
-                appendFileSeparator
-                append("generated")
-                appendFileSeparator
-                append("config")
-            }
-        )
+        val outputDir = project.layout.buildDirectory.dir(buildString {
+            append("generated")
+            appendFileSeparator
+            append("source")
+            appendFileSeparator
+            append("buildConfig")
+            appendFileSeparator
+            append(sourceSetName.name)
+        })
 
         // Ensure the output directory exists
-        outputDir.mkdirs()
+        outputDir.get().asFile.mkdirs()
 
         // Write the generated Kotlin file to the output directory
-        kotlinFile.writeTo(outputDir)
+        kotlinFile.writeTo(outputDir.get().asFile)
 
-        sourceSetName.srcDirs(outputDir.path)
+        sourceSetName.srcDirs(outputDir.get().asFile.absolutePath)
     }
 }
 
