@@ -46,13 +46,16 @@ The options for configProperties are :
 
 ```kotlin
 kmpBuildConfig {
-    packageName.set("your.app.package")
-    this.buildConfigFileName.set("BuildConfig")
+    val localProps = Properties().also {
+        it.load(file(rootProject.file("local.properties").path).inputStream())
+    }
+    packageName.set("mil.jtaps.assettracker")
+    buildConfigFileName.set("BuildConfig")
+    secretKeyFileName.set("SecretKey")
     configProperties {
         "version" withString rootProject.version.toString()
-        "test" withObj {
-            "test2" withString "test2"
-        }
+        "connectionString" withSecretString (localProps.getProperty("connectionString") guardedBy UUID.randomUUID()
+            .toString())
     }
 }
 ```
@@ -61,14 +64,24 @@ Output:
 
 ```kotlin
 public object BuildConfig {
-    public val VERSION: String = "0.1.1-rc.1"
+    public val VERSION: String = "0.1.1-rc.2"
 
-    public object Test {
-        public val TEST2: String = "test2"
-    }
+    public val CONNECTION_STRING: String =
+        "TopkevdOxnzysxdcZbydymyv=rddzc;KmmyexdXkwo=yzpvnkdklkco;KmmyexdUoi=kSW+a76Ojj5nVJKEEdwrKAP7FCrI/C6NSaQBpBKpRWHzwi1z2jiE1L3mXAD9xNrXdtJ21Jzxd8Ze+KCddNSXUA==;OxnzysxdCeppsh=mybo.ecqyfmvyenkzs.xod"
 }
+
+
+public object SecretKey {
+    public val CONNECTION_STRING_KEY: String = "da193df1-dd57-4b02-93d5-245d72ebdsads"
+}
+
+//Use in Code
+val connectionString = CryptoUtils.decrypt(BuildConfig.CONNECTION_STRING, SecretKey.CONNECTION_STRING_KEY)
+
 ```
 
+### Notes About Secrets:
+This is about as secure as sending an email with the username and then one with the password. You are hoping that someone does not hack your email account but if they did they would technically have access to both. This is a way to keep the secrets in plain text out of the codebase but it is not a foolproof way to keep them secure. If you need to keep them secure, you should look into a secret management system. This is a little harder to consider for say and offline android application, where you need to store the secret in the app or the file system, but trying to distribute new files would be hard.
 
 
 #### Set to createBuildConfig task to run before build
