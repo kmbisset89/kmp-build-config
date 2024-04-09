@@ -102,20 +102,23 @@ class WriteBuildConfigFileUseCase {
 
     // Function to define the decrypt method
     private fun decryptFunction(): FunSpec {
+        // Using addCode with a raw string to avoid any issues with % characters.
         return FunSpec.builder("decrypt")
             .addParameter("input", String::class)
             .addParameter("keyWord", String::class)
             .returns(String::class)
-            .addCode("""
-            val shift = keyWord.sumOf { it.code } % 26 // Calculate shift based on keyWord
+            .addCode(
+                """
+            val shift = keyWord.sumOf { it.code } %% 26 // Calculate shift based on keyWord, escaping % as %%
             return input.map { char ->
                 when (char) {
-                    in 'A'..'Z' -> 'Z' - ('Z'.code - char.code + shift) % 26
-                    in 'a'..'z' -> 'z' - ('z'.code - char.code + shift) % 26
+                    in 'A'..'Z' -> 'Z' - ('Z'.code - char.code + shift) %% 26 // Again, escaping %
+                    in 'a'..'z' -> 'z' - ('z'.code - char.code + shift) %% 26
                     else -> char
                 }
             }.joinToString("")
-        """.trimIndent())
+        """.trimIndent()
+            )
             .build()
     }
 }
