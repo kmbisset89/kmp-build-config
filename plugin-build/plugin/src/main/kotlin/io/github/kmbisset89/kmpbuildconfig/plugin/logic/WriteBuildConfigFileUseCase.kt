@@ -1,6 +1,7 @@
 package io.github.kmbisset89.kmpbuildconfig.plugin.logic
 
 import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.TypeSpec
 import io.github.kmbisset89.kmpbuildconfig.plugin.ConfigProperties
@@ -41,6 +42,17 @@ class WriteBuildConfigFileUseCase {
 
         val kotlinSecretFileBuilder = secretKeyFileName?.let { FileSpec.builder(packageName, secretKeyFileName) }
 
+        // Define the CryptoUtils object
+        val cryptoUtils = TypeSpec.objectBuilder("CryptoUtils")
+            .addFunction(decryptFunction())
+            .build()
+
+        val encryptionUtil = secretKeyFileName?.let {
+            FileSpec.builder(packageName, "EncryptionUtil")
+                .addType(cryptoUtils)
+                .build()
+        }
+
         // Create a BuildConfig object with the VERSION property and additional properties from propertyMap
         val buildConfigObject = TypeSpec.objectBuilder(buildConfigFileName.substringBeforeLast(".kt"))
             .addModifiers(KModifier.PUBLIC).also { type ->
@@ -49,7 +61,7 @@ class WriteBuildConfigFileUseCase {
                         is ConfigPropertyTypes.PrimitiveConfigPropertyTypes<*> -> it.build(type)
                         is ConfigPropertyTypes.ObjectConfigPropertyTypes -> it.build(type, kotlinFileBuilder)
                         is ConfigPropertyTypes.SecretConfigPropertyType -> {
-                            secretKeyFileName?.let { name  ->
+                            secretKeyFileName?.let { name ->
                                 TypeSpec.objectBuilder(name.substringBeforeLast(".kt"))
                                     .addModifiers(KModifier.PUBLIC).also { secretType ->
                                         it.build(type, secretType)
@@ -84,6 +96,29 @@ class WriteBuildConfigFileUseCase {
         kotlinFile.writeTo(outputDir.get().asFile)
 
         kotlinSecretFile?.writeTo(outputDir.get().asFile)
+
+        encryptionUtil?.writeTo(outputDir.get().asFile)
+    }
+
+    // Function to define the decrypt method
+    private fun decryptFunction(): FunSpec {
+        return FunSpec.builder("decrypt")
+            .addParameter("input", String::class)
+            .addParameter("keyWord", String::class)
+            .returns(String::class)
+            .addStatement("val shift = keyWord.sumOf { it.code } % 26") // Calculate shift based on keyWord
+            .addStatement(
+                """
+            return input.map { char ->
+                when (char) {
+                    in 'A'..'Z' -> 'Z' - ('Z'.code - char.code + shift) % 26
+                    in 'a'..'z' -> 'z' - ('z'.code - char.code + shift) % 26
+                    else -> char
+                }
+            }.joinToString("")
+        """.trimIndent()
+            )
+            .build()
     }
 }
 

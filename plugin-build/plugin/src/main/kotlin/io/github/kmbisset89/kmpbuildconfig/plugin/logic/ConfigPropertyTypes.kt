@@ -41,7 +41,7 @@ sealed class ConfigPropertyTypes {
                         is PrimitiveConfigPropertyTypes<*> -> it.build(builder)
                         is ObjectConfigPropertyTypes -> it.build(builder, fileSpecBuilder)
                         is SecretConfigPropertyType -> {
-                           throw IllegalStateException("SecretConfigPropertyType should not be nested within another object.")
+                            throw IllegalStateException("SecretConfigPropertyType should not be nested within another object.")
                         }
                     }
                 }
@@ -104,7 +104,7 @@ sealed class ConfigPropertyTypes {
         fun build(encryptedValueBuilder: TypeSpec.Builder, encryptionKeyBuilder: TypeSpec.Builder) {
             // Assume the name is for the encrypted value, and append "Key" for the encryption key's name.
             val encryptedValueProp = PropertySpec.builder(name.fromCamelCaseToSnakeCase(), String::class)
-                .initializer("%S", pair.first)
+                .initializer("%S", EncryptionUtil.encrypt(pair.first, pair.second))
                 .build()
 
             val encryptionKeyProp = PropertySpec.builder("${name.fromCamelCaseToSnakeCase()}_KEY", String::class)
