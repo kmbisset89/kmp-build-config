@@ -46,6 +46,15 @@ abstract class MakeBuildConfig : DefaultTask() {
     )
     abstract val buildConfigFileName: Property<String?>
 
+    // Optional file name for the BuildConfig, defaulting to BuildConfig.kt.
+    @get:Input
+    @get:Optional
+    @get:Option(
+        option = "secretKeyFileName",
+        description = "The name of the secret key file to use in the build config file. Defaults to null and will throw an error if not set and a secret key is required."
+    )
+    abstract val secretKeyFileName: Property<String?>
+
     @get:Nested
     lateinit var config: ConfigProperties
 
@@ -59,13 +68,15 @@ abstract class MakeBuildConfig : DefaultTask() {
         // Retrieve properties or their default values.
         val packageName = packageName.get()
         val buildConfigFileName = buildConfigFileName.orNull ?: "BuildConfig.kt"
+        val secretKeyFileName = secretKeyFileName.orNull
 
         // Execute the use case to generate the BuildConfig file.
         WriteBuildConfigFileUseCase().invoke(
             packageName,
             buildConfigFileName,
             config,
-            project
+            project,
+            secretKeyFileName
         )
     }
 }

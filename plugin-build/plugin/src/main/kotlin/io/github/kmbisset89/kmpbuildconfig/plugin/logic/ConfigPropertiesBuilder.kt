@@ -131,4 +131,17 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
             )
         )
     }
+
+    infix fun String.withSecretString(value: Pair<String, String>) {
+        allConfigProperties.add(
+            ConfigPropertyTypes.SecretConfigPropertyType(
+                name = this,
+                pair = value,
+            )
+        )
+    }
+
+    infix fun String.guardedBy(value: String): Pair<String, String> {
+        return Pair(this, value)
+    }
 }

@@ -28,6 +28,9 @@ abstract class KmpBuildConfigExtension(project: Project) {
     // Property for specifying the name of the BuildConfig file to be generated.
     val buildConfigFileName = objects.property(String::class.java)
 
+    // Property for specifying the name of the secret key file to be used in the generated BuildConfig file.
+    val secretKeyFileName = objects.property(String::class.java)
+
     // Property for specifying the package name to be used in the generated BuildConfig file.
     val packageName = objects.property(String::class.java)
 

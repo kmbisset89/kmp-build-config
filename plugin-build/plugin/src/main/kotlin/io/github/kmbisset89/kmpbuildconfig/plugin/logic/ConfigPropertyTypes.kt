@@ -40,6 +40,9 @@ sealed class ConfigPropertyTypes {
                     when (it) {
                         is PrimitiveConfigPropertyTypes<*> -> it.build(builder)
                         is ObjectConfigPropertyTypes -> it.build(builder, fileSpecBuilder)
+                        is SecretConfigPropertyType -> {
+                           throw IllegalStateException("SecretConfigPropertyType should not be nested within another object.")
+                        }
                     }
                 }
             }.build()
@@ -77,6 +80,39 @@ sealed class ConfigPropertyTypes {
                 .initializer(template, value)
                 .build()
             typeSpecBuilder.addProperty(prop)
+        }
+    }
+
+    /**
+     * Represents a secret configuration property that consists of an encrypted value and a key.
+     *
+     * @property name The base name of the property, which should adhere to snake_case naming conventions for the encrypted value.
+     * @property pair A Pair where the first element is the encryption key and the second is the encrypted value.
+     */
+    class SecretConfigPropertyType(
+        @Input
+        val name: String,
+        @Input
+        val pair: Pair<String, String>
+    ) : ConfigPropertyTypes() {
+        /**
+         * Builds the secret property and adds it to two different [TypeSpec.Builder] instances.
+         *
+         * @param encryptedValueBuilder The builder for constructing type specifications for the encrypted value.
+         * @param encryptionKeyBuilder The builder for constructing type specifications for the encryption key.
+         */
+        fun build(encryptedValueBuilder: TypeSpec.Builder, encryptionKeyBuilder: TypeSpec.Builder) {
+            // Assume the name is for the encrypted value, and append "Key" for the encryption key's name.
+            val encryptedValueProp = PropertySpec.builder(name.fromCamelCaseToSnakeCase(), String::class)
+                .initializer("%S", pair.first)
+                .build()
+
+            val encryptionKeyProp = PropertySpec.builder("${name.fromCamelCaseToSnakeCase()}_KEY", String::class)
+                .initializer("%S", pair.second)
+                .build()
+
+            encryptedValueBuilder.addProperty(encryptedValueProp)
+            encryptionKeyBuilder.addProperty(encryptionKeyProp)
         }
     }
 

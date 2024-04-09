@@ -31,12 +31,15 @@ class WriteBuildConfigFileUseCase {
         packageName: String,
         buildConfigFileName: String,
         config: ConfigProperties,
-        project: Project
+        project: Project,
+        secretKeyFileName: String?
     ) {
         val logger = project.logger
 
         // Prepare the Kotlin file specification with the BuildConfig object
         val kotlinFileBuilder = FileSpec.builder(packageName, buildConfigFileName)
+
+        val kotlinSecretFileBuilder = secretKeyFileName?.let { FileSpec.builder(packageName, secretKeyFileName) }
 
         // Create a BuildConfig object with the VERSION property and additional properties from propertyMap
         val buildConfigObject = TypeSpec.objectBuilder(buildConfigFileName.substringBeforeLast(".kt"))
@@ -45,11 +48,21 @@ class WriteBuildConfigFileUseCase {
                     when (it) {
                         is ConfigPropertyTypes.PrimitiveConfigPropertyTypes<*> -> it.build(type)
                         is ConfigPropertyTypes.ObjectConfigPropertyTypes -> it.build(type, kotlinFileBuilder)
+                        is ConfigPropertyTypes.SecretConfigPropertyType -> {
+                            secretKeyFileName?.let { name  ->
+                                TypeSpec.objectBuilder(name.substringBeforeLast(".kt"))
+                                    .addModifiers(KModifier.PUBLIC).also { secretType ->
+                                        it.build(type, secretType)
+                                    }
+                            } ?: throw IllegalStateException("Secret file name is needed if there are secret objects.")
+                        }
                     }
                 }
             }
 
         val kotlinFile = kotlinFileBuilder.addType(buildConfigObject.build()).build()
+
+        val kotlinSecretFile = kotlinSecretFileBuilder?.addType(buildConfigObject.build())?.build()
 
         val directory = buildString {
             append("generated")
@@ -69,6 +82,8 @@ class WriteBuildConfigFileUseCase {
 
         // Write the generated Kotlin file to the output directory
         kotlinFile.writeTo(outputDir.get().asFile)
+
+        kotlinSecretFile?.writeTo(outputDir.get().asFile)
     }
 }
 
