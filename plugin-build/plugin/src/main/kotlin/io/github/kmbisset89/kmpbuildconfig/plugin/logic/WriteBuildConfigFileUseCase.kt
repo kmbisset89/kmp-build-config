@@ -48,33 +48,37 @@ class WriteBuildConfigFileUseCase {
             .build()
 
         val encryptionUtil = secretKeyFileName?.let {
-            FileSpec.builder(packageName, "EncryptionUtil")
+            FileSpec.builder(packageName, "CryptoUtils.kt")
                 .addType(cryptoUtils)
                 .build()
         }
 
         // Create a BuildConfig object with the VERSION property and additional properties from propertyMap
         val buildConfigObject = TypeSpec.objectBuilder(buildConfigFileName.substringBeforeLast(".kt"))
-            .addModifiers(KModifier.PUBLIC).also { type ->
-                config.properties.forEach {
-                    when (it) {
-                        is ConfigPropertyTypes.PrimitiveConfigPropertyTypes<*> -> it.build(type)
-                        is ConfigPropertyTypes.ObjectConfigPropertyTypes -> it.build(type, kotlinFileBuilder)
-                        is ConfigPropertyTypes.SecretConfigPropertyType -> {
-                            secretKeyFileName?.let { name ->
-                                TypeSpec.objectBuilder(name.substringBeforeLast(".kt"))
-                                    .addModifiers(KModifier.PUBLIC).also { secretType ->
-                                        it.build(type, secretType)
-                                    }
-                            } ?: throw IllegalStateException("Secret file name is needed if there are secret objects.")
-                        }
-                    }
+            .addModifiers(KModifier.PUBLIC)
+
+        val secretType = secretKeyFileName?.let {
+            TypeSpec.objectBuilder(it.substringBeforeLast(".kt"))
+                .addModifiers(KModifier.PUBLIC)
+        }
+
+
+        config.properties.forEach {
+            when (it) {
+                is ConfigPropertyTypes.PrimitiveConfigPropertyTypes<*> -> it.build(buildConfigObject)
+                is ConfigPropertyTypes.ObjectConfigPropertyTypes -> it.build(buildConfigObject, kotlinFileBuilder)
+                is ConfigPropertyTypes.SecretConfigPropertyType -> {
+                    secretType?.let { type ->
+                        it.build(buildConfigObject, type)
+                    } ?: throw IllegalStateException("Secret file name is needed if there are secret objects.")
                 }
             }
+        }
+
 
         val kotlinFile = kotlinFileBuilder.addType(buildConfigObject.build()).build()
 
-        val kotlinSecretFile = kotlinSecretFileBuilder?.addType(buildConfigObject.build())?.build()
+        val kotlinSecretFile = secretType?.let { kotlinSecretFileBuilder?.addType(it.build())?.build()}
 
         val directory = buildString {
             append("generated")
@@ -109,7 +113,8 @@ class WriteBuildConfigFileUseCase {
             .addParameter("input", String::class)
             .addParameter("keyWord", String::class)
             .returns(String::class)
-            .addCode("""
+            .addCode(
+                """
             val shift = keyWord.sumOf { it.code }.mod(26) // Calculate shift using .mod
             return input.map { char ->
                 when (char) {
@@ -118,7 +123,8 @@ class WriteBuildConfigFileUseCase {
                     else -> char
                 }
             }.joinToString("")
-        """.trimIndent())
+        """.trimIndent()
+            )
             .build()
     }
 }
