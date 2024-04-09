@@ -40,7 +40,7 @@ gradlePlugin {
             version = property("VERSION").toString()
             description = property("DESCRIPTION").toString()
             displayName = property("DISPLAY_NAME").toString()
-            tags.set(listOf("SemVer", "Semantic Versioning", "Versioning", "Git", "Tags", "Version", "Versioning Plugin", "Versioning Plugin for Git Tags"))
+            tags.set(listOf("Build Config", "Kotlin", "Kotlin Multiplatform", "Code Generation"))
         }
     }
 }
