@@ -12,7 +12,7 @@ To use the plugin, add the following to your project's `build.gradle.kts` file:
 
 ```kotlin
 plugins {
-    id("io.github.kmbisset89.kmpbuildconfig.plugin") version "0.1.0"
+    id("io.github.kmbisset89.kmpbuildconfig.plugin") version "1.0.0"
 }
 ```
 
@@ -20,7 +20,7 @@ For libs.toml:
 
 ```toml
 [versions]
-  build-config = "0.1.0"
+  build-config = "1.0.0"
 
 [plugins]
 build-config-generator = { id = "io.github.kmbisset89.kmpbuildconfig.plugin", version.ref = "build-config" }
@@ -30,26 +30,64 @@ build-config-generator = { id = "io.github.kmbisset89.kmpbuildconfig.plugin", ve
 
 After applying the plugin, configure it by setting the necessary properties in the plugin's extension block:
 
+The options for configProperties are :
+- withString : A non-null string value
+- withOptionalString : A nullable string value
+- withInt : An integer value
+- withOptionalInt : An optional integer value
+- withLong : A long value
+- withOptionalLong : An optional long value
+- withFloat : A float value
+- withOptionalFloat : An optional float value
+- withDouble : A double value
+- withOptionalDouble : An optional double value
+- withBool : A boolean value
+- withOptionalBool : An optional boolean value
+
 ```kotlin
-semVerConfig {
-    kmpBuildConfig {
-        versionNumber = "1.0.0" // Your project's version
-        packageName = "com.example.project" // The package name for the BuildConfig file
-        sourceSetName = "commonMain" // Optional: The source set name (defaults to commonMain)
-        buildConfigFileName = "BuildConfig.kt" // Optional: The BuildConfig file name (defaults to BuildConfig.kt)
-        buildConfigProperties = mapOf(
-            "API_URL" to "https://api.example.com",
-            "DEBUG" to "true"
-        ) // Optional: Additional properties to include in the BuildConfig
+kmpBuildConfig {
+    packageName.set("your.app.package")
+    this.buildConfigFileName.set("BuildConfig")
+    configProperties {
+        "version" withString rootProject.version.toString()
+        "test" withObj {
+            "test2" withString "test2"
+        }
     }
 }
 ```
 
+Output:
+
+```kotlin
+public object BuildConfig {
+    public val VERSION: String = "0.1.1-rc.1"
+
+    public object Test {
+        public val TEST2: String = "test2"
+    }
+}
+```
+
+
+
 #### Set to createBuildConfig task to run before build
 
 ```kotlin
-tasks.getByName("build").finalizedBy("createBuildConfig")
+tasks.build.dependsOn(tasks.createBuildConfig)
 ```
+
+#### Add sources to the sourceSets
+
+```kotlin
+val addToSources = task("addGeneratedToSources") {
+    kotlin.sourceSets["commonMain"].kotlin.srcDir("build/generated/source/buildConfig")
+    tasks.createBuildConfig{
+        finalizedBy(this@task)
+    }
+}
+```
+
 
 
 ### Generating the BuildConfig
