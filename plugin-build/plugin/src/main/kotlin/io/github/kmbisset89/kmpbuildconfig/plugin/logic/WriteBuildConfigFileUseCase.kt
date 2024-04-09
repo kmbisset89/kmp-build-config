@@ -98,8 +98,6 @@ class WriteBuildConfigFileUseCase {
         kotlinSecretFile?.writeTo(outputDir.get().asFile)
 
         encryptionUtil?.writeTo(outputDir.get().asFile)
-
-        3.
     }
 
 
@@ -107,21 +105,20 @@ class WriteBuildConfigFileUseCase {
     private fun decryptFunction(): FunSpec {
         // Using addCode with a raw string to avoid any issues with % characters.
         return FunSpec.builder("decrypt")
+            .addModifiers(KModifier.PUBLIC)
             .addParameter("input", String::class)
             .addParameter("keyWord", String::class)
             .returns(String::class)
-            .addCode(
-                """
-            val shift = keyWord.sumOf { it.code }.mod(26) // Calculate shift based on keyWord, escaping % as %%
+            .addCode("""
+            val shift = keyWord.sumOf { it.code }.mod(26) // Calculate shift using .mod
             return input.map { char ->
                 when (char) {
-                    in 'A'..'Z' -> 'Z' - ('Z'.code - char.code + shift).mod(26) // Again, escaping %
-                    in 'a'..'z' -> 'z' - ('z'.code - char.code + shift).mod(26)
+                    in 'A'..'Z' -> ('Z' - (('Z'.code - char.code + shift).mod(26))).toChar()
+                    in 'a'..'z' -> ('z' - (('z'.code - char.code + shift).mod(26))).toChar()
                     else -> char
                 }
             }.joinToString("")
-        """.trimIndent()
-            )
+        """.trimIndent())
             .build()
     }
 }
