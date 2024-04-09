@@ -106,9 +106,8 @@ class WriteBuildConfigFileUseCase {
             .addParameter("input", String::class)
             .addParameter("keyWord", String::class)
             .returns(String::class)
-            .addStatement("val shift = keyWord.sumOf { it.code } % 26") // Calculate shift based on keyWord
-            .addStatement(
-                """
+            .addCode("""
+            val shift = keyWord.sumOf { it.code } % 26 // Calculate shift based on keyWord
             return input.map { char ->
                 when (char) {
                     in 'A'..'Z' -> 'Z' - ('Z'.code - char.code + shift) % 26
@@ -116,8 +115,7 @@ class WriteBuildConfigFileUseCase {
                     else -> char
                 }
             }.joinToString("")
-        """.trimIndent()
-            )
+        """.trimIndent())
             .build()
     }
 }
