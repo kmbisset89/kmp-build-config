@@ -49,7 +49,7 @@ kmpBuildConfig {
     val localProps = Properties().also {
         it.load(file(rootProject.file("local.properties").path).inputStream())
     }
-    packageName.set("mil.jtaps.assettracker")
+    packageName.set("com.example.yourproject")
     buildConfigFileName.set("BuildConfig")
     secretKeyFileName.set("SecretKey")
     configProperties {
