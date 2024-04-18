@@ -129,5 +129,5 @@ class WriteBuildConfigFileUseCase {
     }
 }
 
-private val StringBuilder.appendFileSeparator: StringBuilder
+val StringBuilder.appendFileSeparator: StringBuilder
     get() = append(File.separator)

@@ -1,7 +1,9 @@
 package io.github.kmbisset89.kmpbuildconfig.plugin
 
 import io.github.kmbisset89.kmpbuildconfig.plugin.logic.WriteBuildConfigFileUseCase
+import io.github.kmbisset89.kmpbuildconfig.plugin.logic.appendFileSeparator
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -9,6 +11,7 @@ import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.jetbrains.kotlin.gradle.plugin.sources.android.findKotlinSourceSet
 
 
 /**
@@ -54,6 +57,13 @@ abstract class MakeBuildConfig : DefaultTask() {
         description = "The name of the secret key file to use in the build config file. Defaults to null and will throw an error if not set and a secret key is required."
     )
     abstract val secretKeyFileName: Property<String?>
+
+    @get:Input
+    @get:Option(
+        option = "sourceSet",
+        description = "The source set to generate the BuildConfig file in. Defaults to commonMain."
+    )
+    abstract val sourceSet: Property<SourceDirectorySet>
 
     @get:Nested
     lateinit var config: ConfigProperties

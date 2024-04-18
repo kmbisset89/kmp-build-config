@@ -34,6 +34,9 @@ abstract class KmpBuildConfigExtension(project: Project) {
     // Property for specifying the package name to be used in the generated BuildConfig file.
     val packageName = objects.property(String::class.java)
 
+    // Property for specifying the source set to generate the BuildConfig file in.
+    val sourceDir = objects.property(SourceDirectorySet::class.java)
+
     // Holds the configuration properties defined in the build script. Marked as Internal as it should
     // not be considered an input or output for task up-to-date checks.
     @Internal

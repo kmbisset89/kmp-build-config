@@ -1,5 +1,6 @@
 package io.github.kmbisset89.kmpbuildconfig.plugin
 
+import io.github.kmbisset89.kmpbuildconfig.plugin.logic.appendFileSeparator
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -27,7 +28,29 @@ abstract class KmpBuildConfigPlugin : Plugin<Project> {
                 it.buildConfigFileName.set(extension.buildConfigFileName) // Set the build config file name from the extension, if specified.
                 it.secretKeyFileName.set(extension.secretKeyFileName) // Set the secret key file name from the extension, if specified.
                 it.config = extension.config // Set the config object from the extension.
+                it.sourceSet.set(extension.sourceDir) // Set the source set from the extension.
             }
+
+
+        project.afterEvaluate {
+            val taskToAdd = project.task("addToSourceSet") {
+
+                extension.sourceDir.get().srcDirs(buildString {
+                    append(project.layout.buildDirectory.asFile.get().absolutePath)
+                    appendFileSeparator
+                    append("generated")
+                    appendFileSeparator
+                    append("source")
+                    appendFileSeparator
+                    append("buildConfig")
+                })
+            }
+
+
+            task.get().finalizedBy(taskToAdd)
+        }
+
+
     }
 
     companion object {
