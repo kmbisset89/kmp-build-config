@@ -91,6 +91,7 @@ tasks.build.dependsOn(tasks.createBuildConfig)
 ```
 
 #### Add sources to the sourceSets
+#### This is now no longer necessary in 1.0.9+
 
 ```kotlin
 val addToSources = task("addGeneratedToSources") {
