@@ -12,7 +12,7 @@ To use the plugin, add the following to your project's `build.gradle.kts` file:
 
 ```kotlin
 plugins {
-    id("io.github.kmbisset89.kmpbuildconfig.plugin") version "1.0.0"
+    id("io.github.kmbisset89.kmpbuildconfig.plugin") version "1.0.9"
 }
 ```
 
