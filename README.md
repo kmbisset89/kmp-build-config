@@ -20,7 +20,7 @@ For libs.toml:
 
 ```toml
 [versions]
-  build-config = "1.0.0"
+  build-config = "1.0.9"
 
 [plugins]
 build-config-generator = { id = "io.github.kmbisset89.kmpbuildconfig.plugin", version.ref = "build-config" }
