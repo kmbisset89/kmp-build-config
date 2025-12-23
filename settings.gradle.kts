@@ -1,4 +1,7 @@
 pluginManagement {
+    // Make the plugin available to the `plugins { ... }` DSL from the local sources
+    // so the `example` module can use it without publishing.
+    includeBuild("plugin-build")
     repositories {
         gradlePluginPortal()
         mavenCentral()

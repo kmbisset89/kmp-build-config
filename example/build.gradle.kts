@@ -25,9 +25,14 @@ kmpBuildConfig {
     packageName.set("io.github.kmbisset89.kmpbuildconfig")
     buildConfigFileName.set("BuildConfig")
     secretKeyFileName.set("Secret")
-    sourceDir.set(kotlin.sourceSets.findByName("commonMain")!!.kotlin)
     configProperties {
-        "testProperty" to "testValue"
+        sourceSet("commonMain") {
+            "testProperty" to "testValue"
+        }
+
+        sourceSet("desktopMain") {
+            "desktopProperty" to "desktopValue"
+        }
     }
 }
 

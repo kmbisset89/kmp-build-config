@@ -1,8 +1,8 @@
 package io.github.kmbisset89.kmpbuildconfig.plugin
 
-import io.github.kmbisset89.kmpbuildconfig.plugin.logic.appendFileSeparator
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 /**
  * A Gradle plugin for Kotlin Multiplatform (KMP) projects that facilitates the creation of a BuildConfig file.
@@ -28,26 +28,29 @@ abstract class KmpBuildConfigPlugin : Plugin<Project> {
                 it.buildConfigFileName.set(extension.buildConfigFileName) // Set the build config file name from the extension, if specified.
                 it.secretKeyFileName.set(extension.secretKeyFileName) // Set the secret key file name from the extension, if specified.
                 it.config = extension.config // Set the config object from the extension.
-                it.sourceSet.set(extension.sourceDir) // Set the source set from the extension.
             }
 
 
         project.afterEvaluate {
-            val taskToAdd = project.task("addToSourceSet") {
+            val kotlin = project.extensions.findByType(KotlinMultiplatformExtension::class.java)
+                ?: throw IllegalStateException("KMP BuildConfig plugin requires the Kotlin Multiplatform plugin to be applied.")
 
-                extension.sourceDir.get().srcDirs(buildString {
-                    append(project.layout.buildDirectory.asFile.get().absolutePath)
-                    appendFileSeparator
-                    append("generated")
-                    appendFileSeparator
-                    append("source")
-                    appendFileSeparator
-                    append("buildConfig")
-                })
+            // Wire generated sources into each configured source set.
+            extension.config.sourceSets.forEach { ss ->
+                val outputDir = project.layout.buildDirectory
+                    .dir("generated/source/buildConfig/${ss.name}")
+                    .get()
+                    .asFile
+
+                val kotlinSourceSet = kotlin.sourceSets.findByName(ss.name)
+                    ?: throw IllegalStateException("Kotlin sourceSet '${ss.name}' was not found.")
+
+                kotlinSourceSet.kotlin.srcDir(outputDir)
             }
 
-
-            task.get().finalizedBy(taskToAdd)
+            // Ensure wiring runs after generation when users hook createBuildConfig into their build.
+            // (Adding srcDirs is safe even if the directory doesn't exist yet.)
+            task.get()
         }
 
 

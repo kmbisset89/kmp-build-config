@@ -53,12 +53,24 @@ kmpBuildConfig {
     buildConfigFileName.set("BuildConfig")
     secretKeyFileName.set("SecretKey")
     configProperties {
-        "version" withString rootProject.version.toString()
-        "connectionString" withSecretString (localProps.getProperty("connectionString") guardedBy UUID.randomUUID()
-            .toString())
+        sourceSet("commonMain") {
+            "version" withString rootProject.version.toString()
+        }
+
+        sourceSet("androidMain") {
+            // Convenient alias for strings:
+            "apiBaseUrl" to "https://example.com"
+
+            "connectionString" withSecretString (localProps.getProperty("connectionString") guardedBy UUID.randomUUID()
+                .toString())
+        }
     }
 }
 ```
+
+#### Notes about multiple source sets
+- If you configure **more than one** `sourceSet("...")`, the plugin will generate **distinct objects** to avoid duplicate classes on platform compilations.
+  - Example: with `buildConfigFileName.set("BuildConfig")`, you’ll get `BuildConfigCommonMain` and `BuildConfigAndroidMain`.
 
 Output:
 
@@ -118,7 +130,7 @@ Run the createBuildConfig Gradle task to generate the BuildConfig.kt file:
 
 - Generates a `BuildConfig.kt` file with customizable properties.
 - Supports specifying the package name, version number, and additional properties to include in the `BuildConfig`.
-- Allows setting the source set name and the build config file's name through the plugin's extension.
+- Supports configuring properties per Kotlin source set via `configProperties { sourceSet("...") { ... } }`.
 - Easy to integrate into existing Kotlin Multiplatform projects.
 
 ## Contributing 🤝
