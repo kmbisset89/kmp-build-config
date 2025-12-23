@@ -3,18 +3,21 @@ package io.github.kmbisset89.kmpbuildconfig.plugin.logic
 import kotlin.reflect.full.createType
 
 /**
- * A builder class for constructing configuration properties in a DSL-style manner.
- * Allows for easy creation and grouping of both primitive and object configuration properties.
+ * Scope that can collect a list of [ConfigPropertyTypes] using a DSL.
  *
- * @param initBlock A lambda function to initialize the builder with the configuration properties.
+ * This is used both for the root `configProperties { ... }` block and for nested
+ * `sourceSet("...") { ... }` blocks.
  */
-open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit) {
-    // Holds all configuration properties added to this builder.
-    val allConfigProperties: MutableList<ConfigPropertyTypes> = mutableListOf()
-
-    // Initialize the builder with the provided block of configuration properties.
-    init {
-        initBlock()
+open class SourceSetPropertiesBuilder(
+    internal val allConfigProperties: MutableList<ConfigPropertyTypes>,
+) {
+    /**
+     * Convenience alias so users can write `"key" to "value"` instead of `"key" withString "value"`.
+     *
+     * Note: This shadows Kotlin's stdlib `to` extension inside this DSL scope.
+     */
+    infix fun String.to(value: String) {
+        this.withString(value)
     }
 
     /**
@@ -113,21 +116,18 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
         )
     }
 
-    // Similar pattern is followed for other data types like Long, Float, and Double
-    // and their nullable counterparts.
-
     /**
      * Adds a complex object configuration property to the configuration.
      * This allows for nesting of properties within an object structure.
      *
      * @param valueBuilder A lambda function to define the nested properties within this object.
      */
-    infix fun String.withObj(valueBuilder: ConfigPropertiesBuilder.() -> Unit) {
-        val builder = ConfigPropertiesBuilder(valueBuilder)
+    infix fun String.withObj(valueBuilder: SourceSetPropertiesBuilder.() -> Unit) {
+        val builder = SourceSetPropertiesBuilder(mutableListOf()).apply(valueBuilder)
         allConfigProperties.add(
             ConfigPropertyTypes.ObjectConfigPropertyTypes(
                 name = this,
-                properties = builder.allConfigProperties
+                properties = builder.allConfigProperties.toList()
             )
         )
     }
@@ -143,5 +143,38 @@ open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit
 
     infix fun String.guardedBy(value: String): Pair<String, String> {
         return Pair(this, value)
+    }
+}
+
+/**
+ * Root builder for `configProperties { ... }`.
+ *
+ * Users can either add properties directly (defaults to [DEFAULT_SOURCE_SET_NAME]) or group them by source set:
+ *
+ * ```
+ * configProperties {
+ *   sourceSet("commonMain") { "foo" to "bar" }
+ *   sourceSet("androidMain") { "baz" withString "qux" }
+ * }
+ * ```
+ */
+open class ConfigPropertiesBuilder(initBlock: ConfigPropertiesBuilder.() -> Unit) :
+    SourceSetPropertiesBuilder(mutableListOf()) {
+
+    internal companion object {
+        const val DEFAULT_SOURCE_SET_NAME = "commonMain"
+    }
+
+    internal val sourceSetProperties: LinkedHashMap<String, MutableList<ConfigPropertyTypes>> = linkedMapOf()
+
+    init {
+        // Anything added directly to this builder is treated as `commonMain` for backward compatibility.
+        sourceSetProperties[DEFAULT_SOURCE_SET_NAME] = allConfigProperties
+        initBlock()
+    }
+
+    fun sourceSet(name: String, block: SourceSetPropertiesBuilder.() -> Unit) {
+        val list = sourceSetProperties.getOrPut(name) { mutableListOf() }
+        SourceSetPropertiesBuilder(list).apply(block)
     }
 }

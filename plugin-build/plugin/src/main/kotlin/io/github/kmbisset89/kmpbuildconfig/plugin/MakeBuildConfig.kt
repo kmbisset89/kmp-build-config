@@ -1,9 +1,7 @@
 package io.github.kmbisset89.kmpbuildconfig.plugin
 
 import io.github.kmbisset89.kmpbuildconfig.plugin.logic.WriteBuildConfigFileUseCase
-import io.github.kmbisset89.kmpbuildconfig.plugin.logic.appendFileSeparator
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -11,7 +9,6 @@ import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
-import org.jetbrains.kotlin.gradle.plugin.sources.android.findKotlinSourceSet
 
 
 /**
@@ -58,13 +55,6 @@ abstract class MakeBuildConfig : DefaultTask() {
     )
     abstract val secretKeyFileName: Property<String?>
 
-    @get:Input
-    @get:Option(
-        option = "sourceSet",
-        description = "The source set to generate the BuildConfig file in. Defaults to commonMain."
-    )
-    abstract val sourceSet: Property<SourceDirectorySet>
-
     @get:Nested
     lateinit var config: ConfigProperties
 
@@ -77,16 +67,60 @@ abstract class MakeBuildConfig : DefaultTask() {
     fun executeTask() {
         // Retrieve properties or their default values.
         val packageName = packageName.get()
-        val buildConfigFileName = buildConfigFileName.orNull ?: "BuildConfig.kt"
-        val secretKeyFileName = secretKeyFileName.orNull
+        val baseBuildConfigFileName = normalizeKtFileName(buildConfigFileName.orNull ?: "BuildConfig")
+        val baseBuildConfigTypeName = baseBuildConfigFileName.removeSuffix(".kt")
+        val baseSecretKeyFileName = secretKeyFileName.orNull?.let(::normalizeKtFileName)
+        val baseSecretKeyTypeName = baseSecretKeyFileName?.removeSuffix(".kt")
 
-        // Execute the use case to generate the BuildConfig file.
-        WriteBuildConfigFileUseCase().invoke(
-            packageName,
-            buildConfigFileName,
-            config,
-            project,
-            secretKeyFileName
-        )
+        val sourceSets = config.sourceSets
+        if (sourceSets.isEmpty()) return
+
+        val multipleSourceSets = sourceSets.size > 1
+
+        val anySecrets = sourceSets.any { ss ->
+            ss.properties.any { it is io.github.kmbisset89.kmpbuildconfig.plugin.logic.ConfigPropertyTypes.SecretConfigPropertyType }
+        }
+
+        if (anySecrets && baseSecretKeyFileName == null) {
+            throw IllegalStateException("secretKeyFileName is needed if there are secret objects.")
+        }
+
+        val cryptoSourceSetName = sourceSets.firstOrNull { it.name == "commonMain" }?.name ?: sourceSets.first().name
+
+        sourceSets.forEach { sourceSet ->
+            val suffix = if (multipleSourceSets) sourceSet.name.toPascalCase() else ""
+
+            val buildConfigTypeName = baseBuildConfigTypeName + suffix
+            val buildConfigFileName = "$buildConfigTypeName.kt"
+
+            val hasSecretsInThisSourceSet =
+                sourceSet.properties.any { it is io.github.kmbisset89.kmpbuildconfig.plugin.logic.ConfigPropertyTypes.SecretConfigPropertyType }
+
+            val secretTypeName = if (hasSecretsInThisSourceSet) baseSecretKeyTypeName?.let { it + suffix } else null
+            val secretFileName = secretTypeName?.let { "$it.kt" }
+
+            val outputDir = project.layout.buildDirectory
+                .dir("generated/source/buildConfig/${sourceSet.name}")
+                .get()
+                .asFile
+
+            // Execute the use case to generate the BuildConfig file.
+            WriteBuildConfigFileUseCase().invoke(
+                packageName = packageName,
+                buildConfigFileName = buildConfigFileName,
+                buildConfigTypeName = buildConfigTypeName,
+                properties = sourceSet.properties,
+                project = project,
+                secretKeyFileName = secretFileName,
+                secretKeyTypeName = secretTypeName,
+                outputDir = outputDir,
+                writeCryptoUtils = anySecrets && sourceSet.name == cryptoSourceSetName,
+            )
+        }
     }
+
+    private fun normalizeKtFileName(name: String): String =
+        if (name.endsWith(".kt")) name else "$name.kt"
+
+    private fun String.toPascalCase(): String = replaceFirstChar { it.uppercase() }
 }

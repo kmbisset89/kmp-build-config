@@ -3,7 +3,6 @@ package io.github.kmbisset89.kmpbuildconfig.plugin
 import io.github.kmbisset89.kmpbuildconfig.plugin.logic.ConfigPropertiesBuilder
 import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.tasks.Internal
 import javax.inject.Inject
 
@@ -34,9 +33,6 @@ abstract class KmpBuildConfigExtension(project: Project) {
     // Property for specifying the package name to be used in the generated BuildConfig file.
     val packageName = objects.property(String::class.java)
 
-    // Property for specifying the source set to generate the BuildConfig file in.
-    val sourceDir = objects.property(SourceDirectorySet::class.java)
-
     // Holds the configuration properties defined in the build script. Marked as Internal as it should
     // not be considered an input or output for task up-to-date checks.
     @Internal
@@ -53,6 +49,10 @@ abstract class KmpBuildConfigExtension(project: Project) {
         val builder = ConfigPropertiesBuilder {
             action.execute(this)
         }
-        config = ConfigProperties(builder.allConfigProperties)
+        config = ConfigProperties(
+            sourceSets = builder.sourceSetProperties.map { (name, props) ->
+                SourceSetConfigProperties(name = name, properties = props.toList())
+            }
+        )
     }
 }
